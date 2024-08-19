@@ -47,15 +47,31 @@ extension Purchases {
 
     
     // MARK: WIP
-    func offeringsAsync(fetchPolicy: OfferingsManager.FetchPolicy) async throws -> Offerings {
-//        return try await withCheckedThrowingContinuation { continuation in
-//            self.getOfferings(fetchPolicy: fetchPolicy) { offerings, error in
+//    func offeringsAsync(fetchPolicy: OfferingsManager.FetchPolicy) async throws -> Offerings {
+//        return try await withCheckedThrowingContinuation { [weak self] continuation in
+//            self?.getOfferings(fetchPolicy: fetchPolicy) { offerings, error in
 //                continuation.resume(with: Result(offerings, error))
 //            }
 //        }
+//    }
+    
+    func offeringsAsync(fetchPolicy: OfferingsManager.FetchPolicy) async throws -> Offerings {
         return try await withCheckedThrowingContinuation { [weak self] continuation in
-            self?.getOfferings(fetchPolicy: fetchPolicy) { offerings, error in
-                continuation.resume(with: Result(offerings, error))
+            guard let strongSelf = self else {
+                let error = NSError(domain: "PurchasesErrorDomain", code: -1, userInfo: [NSLocalizedDescriptionKey: "Self is nil."])
+                continuation.resume(throwing: error)
+                return
+            }
+            strongSelf.getOfferings(fetchPolicy: fetchPolicy) { offerings, error in
+                if let offerings = offerings {
+                    continuation.resume(returning: offerings)
+                } else if let error = error {
+                    continuation.resume(throwing: error)
+                } else {
+                    // Handle the case where both `offerings` and `error` are nil
+                    let unexpectedError = NSError(domain: "PurchasesErrorDomain", code: -2, userInfo: [NSLocalizedDescriptionKey: "Received nil offerings and error."])
+                    continuation.resume(throwing: unexpectedError)
+                }
             }
         }
     }
