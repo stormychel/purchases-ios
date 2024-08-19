@@ -45,14 +45,23 @@ extension Purchases {
 
     #endif
 
+    
+    // MARK: WIP
     func offeringsAsync(fetchPolicy: OfferingsManager.FetchPolicy) async throws -> Offerings {
-        return try await withCheckedThrowingContinuation { continuation in
-            self.getOfferings(fetchPolicy: fetchPolicy) { offerings, error in
+//        return try await withCheckedThrowingContinuation { continuation in
+//            self.getOfferings(fetchPolicy: fetchPolicy) { offerings, error in
+//                continuation.resume(with: Result(offerings, error))
+//            }
+//        }
+        return try await withCheckedThrowingContinuation { [weak self] continuation in
+            self?.getOfferings(fetchPolicy: fetchPolicy) { offerings, error in
                 continuation.resume(with: Result(offerings, error))
             }
         }
     }
-
+    //
+    
+    
     func productsAsync(_ productIdentifiers: [String]) async -> [StoreProduct] {
         return await withCheckedContinuation { continuation in
             getProducts(productIdentifiers) { result in
