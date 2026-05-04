@@ -24,6 +24,9 @@ parameters:
   bump_with_fallback_pr_lookup:
     type: boolean
     default: false
+  version_file_changed:
+    type: boolean
+    default: false
   requested_jobs:
     type: string
     default: ""
@@ -2416,6 +2419,7 @@ workflows:
             equal: [scheduled_pipeline, << pipeline.trigger_source >>]
         - not:
             equal: [bump, << pipeline.parameters.action >>]
+        - equal: [true, << pipeline.parameters.version_file_changed >>]
     jobs:
       - prepare-next-version:
           <<: *only-main-branch
